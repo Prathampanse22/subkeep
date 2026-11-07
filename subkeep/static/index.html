@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SubKeep</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%234f46e5'/%3E%3Ctext x='16' y='22' font-size='16' text-anchor='middle' fill='white' font-family='sans-serif' font-weight='700'%3ES%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <div class="fx" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
+  <header class="topbar">
+    <div class="brand"><span class="logo">S</span> SubKeep</div>
+    <nav class="tabs" role="tablist">
+      <button role="tab" data-view="dashboard" aria-selected="true">Dashboard</button>
+      <button role="tab" data-view="subscriptions">Subscriptions</button>
+      <button role="tab" data-view="expenses">Expenses</button>
+      <button role="tab" data-view="calendar">Calendar</button>
+      <button role="tab" data-view="settings">Settings</button>
+    </nav>
+  </header>
+
+  <main>
+    <!-- Dashboard -->
+    <section id="view-dashboard" class="view">
+      <div class="quick-actions">
+        <button class="btn primary" data-action="new-subscription">+ Add subscription</button>
+        <button class="btn" data-action="new-expense">+ Add expense</button>
+      </div>
+      <div class="stats">
+        <div class="stat"><span class="label">Subscriptions / month</span><span class="value" id="stat-sub-month">–</span><span class="hint" id="stat-sub-count"></span></div>
+        <div class="stat"><span class="label">Subscriptions / year</span><span class="value" id="stat-sub-year">–</span></div>
+        <div class="stat"><span class="label">Expenses this month</span><span class="value" id="stat-exp-month">–</span></div>
+        <div class="stat accent"><span class="label">Total this month</span><span class="value" id="stat-total">–</span><span class="hint">subscriptions + expenses</span></div>
+      </div>
+      <div class="grid2">
+        <div class="card">
+          <h2>Upcoming renewals <small>next 30 days</small></h2>
+          <ul class="list" id="upcoming"></ul>
+        </div>
+        <div class="card">
+          <h2>This month by category</h2>
+          <div id="by-category" class="bars"></div>
+        </div>
+      </div>
+      <div class="card">
+        <h2>Last 6 months</h2>
+        <div id="trend" class="trend"></div>
+        <div class="legend"><span class="sw sub"></span> Subscriptions <span class="sw exp"></span> Expenses</div>
+      </div>
+    </section>
+
+    <!-- Subscriptions -->
+    <section id="view-subscriptions" class="view" hidden>
+      <div class="toolbar">
+        <input type="search" id="sub-search" placeholder="Search subscriptions…" aria-label="Search subscriptions">
+        <select id="sub-filter" aria-label="Filter by status">
+          <option value="">All statuses</option>
+          <option value="active">Active</option>
+          <option value="trial">Trial</option>
+          <option value="paused">Paused</option>
+          <option value="cancelled">Cancelled</option>
+        </select>
+        <button class="btn primary" data-action="new-subscription">+ Add subscription</button>
+      </div>
+      <div class="card flush">
+        <table class="table">
+          <thead><tr><th>Name</th><th>Category</th><th class="num">Cost</th><th>Cycle</th><th class="num">Per month</th><th>Next renewal</th><th>Status</th><th></th></tr></thead>
+          <tbody id="sub-rows"></tbody>
+        </table>
+        <p class="empty" id="sub-empty" hidden>No subscriptions yet. Add your first one — Netflix, Spotify, your phone plan…</p>
+      </div>
+    </section>
+
+    <!-- Expenses -->
+    <section id="view-expenses" class="view" hidden>
+      <div class="toolbar">
+        <button class="btn icon" id="month-prev" aria-label="Previous month">‹</button>
+        <strong id="month-label" class="month-label"></strong>
+        <button class="btn icon" id="month-next" aria-label="Next month">›</button>
+        <button class="btn ghost" id="month-all">Show all</button>
+        <span class="spacer"></span>
+        <span class="muted">Total: <strong id="exp-total">–</strong></span>
+        <button class="btn primary" data-action="new-expense">+ Add expense</button>
+      </div>
+      <div class="card flush">
+        <table class="table">
+          <thead><tr><th>Date</th><th>Description</th><th>Category</th><th>Paid with</th><th class="num">Amount</th><th></th></tr></thead>
+          <tbody id="exp-rows"></tbody>
+        </table>
+        <p class="empty" id="exp-empty" hidden>No expenses for this period. Add groceries, fuel, a dinner out…</p>
+      </div>
+    </section>
+
+    <!-- Calendar -->
+    <section id="view-calendar" class="view" hidden>
+      <div class="toolbar">
+        <button class="btn icon" id="cal-prev" aria-label="Previous month">‹</button>
+        <strong id="cal-label" class="month-label"></strong>
+        <button class="btn icon" id="cal-next" aria-label="Next month">›</button>
+        <button class="btn ghost" id="cal-today">Today</button>
+        <span class="spacer"></span>
+        <span class="cal-total"><span class="dot sub"></span> Renewals <strong id="cal-renewals">–</strong></span>
+        <span class="cal-total"><span class="dot exp"></span> Expenses <strong id="cal-expenses">–</strong></span>
+      </div>
+      <div class="card flush cal-card">
+        <div class="cal-head" id="cal-head"></div>
+        <div class="cal-grid" id="cal-grid"></div>
+      </div>
+      <div class="card" id="cal-detail">
+        <div class="cal-detail-head">
+          <h2 id="cal-detail-title">Pick a day</h2>
+          <button class="btn small" id="cal-add-expense" hidden>+ Add expense on this day</button>
+        </div>
+        <ul class="list" id="cal-detail-list"><li class="muted">Click any day to see what renews or what you spent.</li></ul>
+      </div>
+    </section>
+
+    <!-- Settings -->
+    <section id="view-settings" class="view" hidden>
+      <div class="grid2">
+        <div class="card">
+          <h2>Preferences</h2>
+          <label class="field">Currency
+            <select id="set-currency"></select>
+          </label>
+          <div class="field">Theme
+            <div class="theme-picker" id="theme-picker" role="radiogroup" aria-label="Theme">
+              <button type="button" role="radio" data-theme-value="system" class="theme-swatch sw-system"><span class="sw-preview"></span>Match computer</button>
+              <button type="button" role="radio" data-theme-value="light" class="theme-swatch sw-light"><span class="sw-preview"></span>Light</button>
+              <button type="button" role="radio" data-theme-value="dark" class="theme-swatch sw-dark"><span class="sw-preview"></span>Dark</button>
+              <button type="button" role="radio" data-theme-value="aurora" class="theme-swatch sw-aurora"><span class="sw-preview"></span>Aurora <small>animated</small></button>
+              <button type="button" role="radio" data-theme-value="sakura" class="theme-swatch sw-sakura"><span class="sw-preview"></span>Sakura</button>
+              <button type="button" role="radio" data-theme-value="forest" class="theme-swatch sw-forest"><span class="sw-preview"></span>Forest</button>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <h2>Categories</h2>
+          <form id="cat-form" class="inline-form">
+            <input id="cat-name" placeholder="New category" maxlength="60" aria-label="New category name" required>
+            <button class="btn" type="submit">Add</button>
+          </form>
+          <ul class="chips" id="cat-list"></ul>
+        </div>
+        <div class="card">
+          <h2>Backup &amp; export</h2>
+          <p class="muted">Your data lives only on this computer. Download a backup now and then.</p>
+          <div class="btn-row">
+            <a class="btn" href="/api/export/json" download>Download backup (JSON)</a>
+            <a class="btn" href="/api/export/subscriptions.csv" download>Subscriptions CSV</a>
+            <a class="btn" href="/api/export/expenses.csv" download>Expenses CSV</a>
+          </div>
+          <h3>Restore from backup</h3>
+          <p class="muted">Replaces everything currently in SubKeep with the backup's contents.</p>
+          <input type="file" id="import-file" accept=".json,application/json" aria-label="Choose backup file">
+        </div>
+        <div class="card">
+          <h2>About</h2>
+          <p class="muted" id="about"></p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Subscription dialog -->
+  <dialog id="sub-dialog">
+    <form id="sub-form" method="dialog" novalidate>
+      <h2 id="sub-dialog-title">Add subscription</h2>
+      <div class="form-grid">
+        <label class="field span2">Name *<input name="name" required maxlength="120" placeholder="e.g. Netflix"></label>
+        <label class="field">Cost *<input name="cost" type="number" step="0.01" min="0" required placeholder="9.99"></label>
+        <label class="field">Billing cycle
+          <select name="cycle">
+            <option value="weekly">Weekly</option>
+            <option value="monthly" selected>Monthly</option>
+            <option value="quarterly">Every 3 months</option>
+            <option value="yearly">Yearly</option>
+          </select>
+        </label>
+        <label class="field">Next renewal<input name="next_renewal" type="date"></label>
+        <label class="field">Status
+          <select name="status">
+            <option value="active">Active</option>
+            <option value="trial">Free trial</option>
+            <option value="paused">Paused</option>
+            <option value="cancelled">Cancelled</option>
+          </select>
+        </label>
+        <label class="field">Category<select name="category_id" class="cat-select"></select></label>
+        <label class="field">Paid with<input name="payment_method" maxlength="80" placeholder="e.g. Visa ••42"></label>
+        <label class="field span2">Website<input name="url" type="url" maxlength="500" placeholder="https://"></label>
+        <label class="field span2">Notes<textarea name="notes" rows="2" maxlength="2000"></textarea></label>
+      </div>
+      <p class="form-error" role="alert"></p>
+      <div class="dialog-actions">
+        <button type="button" class="btn danger ghost" data-delete hidden>Delete</button>
+        <span class="spacer"></span>
+        <button type="button" class="btn" data-close>Cancel</button>
+        <button type="submit" class="btn primary">Save</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Expense dialog -->
+  <dialog id="exp-dialog">
+    <form id="exp-form" method="dialog" novalidate>
+      <h2 id="exp-dialog-title">Add expense</h2>
+      <div class="form-grid">
+        <label class="field span2">Description *<input name="description" required maxlength="200" placeholder="e.g. Groceries"></label>
+        <label class="field">Amount *<input name="amount" type="number" step="0.01" min="0" required placeholder="25.00"></label>
+        <label class="field">Date *<input name="spent_on" type="date" required></label>
+        <label class="field">Category<select name="category_id" class="cat-select"></select></label>
+        <label class="field">Paid with<input name="payment_method" maxlength="80" placeholder="e.g. Cash"></label>
+        <label class="field span2">Notes<textarea name="notes" rows="2" maxlength="2000"></textarea></label>
+      </div>
+      <p class="form-error" role="alert"></p>
+      <div class="dialog-actions">
+        <button type="button" class="btn danger ghost" data-delete hidden>Delete</button>
+        <span class="spacer"></span>
+        <button type="button" class="btn" data-close>Cancel</button>
+        <button type="submit" class="btn primary">Save</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="/app.js"></script>
+</body>
+</html>

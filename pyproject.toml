@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "subkeep"
+version = "1.0.0"
+description = "A private, local-first subscription and expense tracker"
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.9"
+dependencies = []
+
+[project.scripts]
+subkeep = "subkeep.__main__:main"
+
+[tool.setuptools]
+packages = ["subkeep"]
+
+[tool.setuptools.package-data]
+subkeep = ["static/*"]
